@@ -8,7 +8,7 @@ using System.IO;
 
 namespace PlanetNuLib
 {
-    class PlanetNu
+    public class PlanetNu
     {
         static HttpWebRequest GetRequest(string address)
         {

@@ -9,8 +9,8 @@ namespace PlanetNuLib
     {
         static void QuickSave(string filename, string s)
         {
-            StreamWriter sw = new StreamWriter("games.json");
-             sw.Write(PlanetNu.GetGameList());
+            StreamWriter sw = new StreamWriter(filename);
+             sw.Write(s);
             sw.Close();
         }
         static void Main(string[] args)
@@ -22,7 +22,7 @@ namespace PlanetNuLib
            // string s = sw.ReadToEnd();
            // sw.Close();
             string s = PlanetNu.GetTurnData(815, 3);
-            QuickSave("turn.json", s);
+            QuickSave("games.json", s);
             object test = JSON.JsonDecode(s);
 
            // Console.WriteLine(PlanetNu.GetGameList());
