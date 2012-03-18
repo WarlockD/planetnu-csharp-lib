@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Windows.Data;
 using System.Globalization;
 using ZoomAndPan;
 using PlanetNuLib;
@@ -96,6 +95,27 @@ namespace PlanetNuClient
         }
         object QuickLoadSave(int id, int player)
         {
+            string settingsfiles = "settings.json";
+            if (System.IO.File.Exists(settingsfiles))
+            {
+                /// WAYYY TO MUCH Checking.  might end up with json.net at the end.
+                System.IO.StreamReader sr = new System.IO.StreamReader(settingsfiles);
+                object test = JSON.JsonDecode(sr.ReadToEnd());
+                if (test is ArrayList)
+                {
+                    ArrayList a = test as ArrayList;
+                    if (a.Count == 2) {
+                        if (a[0] is double && a[1] is double)
+                        {
+                            id = (int)(double)a[0];
+                            player = (int)(double)a[1];
+                        }
+                    }
+
+                }
+                sr.Close();
+                test = null;
+            }
             string filename = string.Format("GAME{0}PLAYER{1}.json", id, player);
             if (System.IO.File.Exists(filename))
             {
@@ -108,7 +128,7 @@ namespace PlanetNuClient
             string s = PlanetNuLib.PlanetNu.GetTurnData(id, player);
             sw.Write(s);
             sw.Close();
-            return QuickLoadSave(id, player);
+            return JSON.JsonDecode(s);
         }
         /// <summary>
         /// Event raised when the Window has loaded.
