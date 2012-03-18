@@ -614,21 +614,29 @@ namespace PlanetNuLib
         Null,
         Array
     }
-    public struct JSON_VALUE
+    // Using this to save on boxing  Eveutaly I will be using this to format Datetime and other stuff in PlanetNu
+    // This is STRICTLY for values though.  
+    // Eh fuck it.  I am going to SVN this, kill it and build the objects manualy.  I keep going to far into making generics.
+    public struct nuValue
     {
+        public enum TYPE { Null = 0, Number, String, Bool };
         JSON_TYPE _type;
         int _hash;
         object _obj;
         double _num;
-        public JSON_TYPE jType { get { return _type; } }
-        public JSON_VALUE(double number) { _num = number; _obj = null; _hash = Convert.ToInt32(number); _type = JSON_TYPE.Number; }
-        public JSON_VALUE(int number) { _num = number; _obj = null; _hash = number; _type = JSON_TYPE.Number; }
-        public JSON_VALUE(List<JSON_VALUE> array) { _num = 0; _obj = array; _hash = array.GetHashCode(); _type = JSON_TYPE.Array; }
-        public JSON_VALUE(Dictionary<string, JSON_VALUE> obj) { _num = 0; _obj = obj; _hash = obj.GetHashCode(); _type = JSON_TYPE.Object; }
-        public JSON_VALUE(string str) { _num = 0; _obj = str; _hash = str.GetHashCode(); _type = JSON_TYPE.String; }
-        public JSON_VALUE(bool b) { _num = b ? 1 : 0; _obj = null; _hash = b ? 1 : 0; _type = JSON_TYPE.Bool; }
+        public nuValue jType { get { return _type; } }
+        public nuValue(double number) { _num = number; _obj = null; _hash = Convert.ToInt32(number); _type = JSON_TYPE.Number; }
+        public nuValue(int number) { _num = number; _obj = null; _hash = number; _type = JSON_TYPE.Number; }
+        public nuValue(string str) { _num = 0; _obj = str; _hash = str.GetHashCode(); _type = JSON_TYPE.String; }
+        public nuValue(bool b) { _num = b ? 1 : 0; _obj = null; _hash = b ? 1 : 0; _type = JSON_TYPE.Bool; }
+        public static implicit operator nuValue(string s) { return new nuValue(s); }
+        public static implicit operator nuValue(double n) { return new nuValue(n); }
+        public static implicit operator nuValue(int n) { return new nuValue(n); }
+        public static implicit operator nuValue(bool b) { return new nuValue(b); }
         public override int GetHashCode() { return _hash; }
-        public override bool Equals(object obj) { return _type == JSON_TYPE.Number ? _num.Equals(obj) : _obj.Equals(obj); }
+        // If you don't know why this is like this, its so we can use this type to look up an array.  Arrays don't like 
+        // doubles:P
+        public override bool Equals(object obj) { return _type == JSON_TYPE.Number ? _hash.Equals(obj) : _obj.Equals(obj); }
         public override string ToString()
         {
             switch (_type)
@@ -637,31 +645,8 @@ namespace PlanetNuLib
                 case JSON_TYPE.Number: return _num == _hash ? _hash.ToString() : _num.ToString();
                 case JSON_TYPE.String: return string.Format("\"%s\"", _obj.ToString());
                 case JSON_TYPE.Bool: return _hash != 0 ? true.ToString() : false.ToString();
-                case JSON_TYPE.Object:
-                    {
-                        StringBuilder b = new StringBuilder(1024);
-                        b.Append('{');
-                        foreach (KeyValuePair<string, JSON_VALUE> o in (_obj as Dictionary<string, JSON_VALUE>))
-                            b.AppendFormat(" \"%s\" : %s ,", o.Key, o.Value.ToString());
-                        b.Length -= 1; // Get rid of the last commma
-                        b.Append("} ");
-                        return b.ToString();
-                    }
-                case JSON_TYPE.Array:
-                    {
-                        StringBuilder b = new StringBuilder(1024);
-                        b.Append('[');
-                        foreach (JSON_VALUE o in (_obj as List<JSON_VALUE>))
-                            if (o._type == JSON_TYPE.String)
-                                b.AppendFormat(" \"%s\" ,", o.ToString());
-                            else
-                                b.AppendFormat(" %s ,", o.ToString());
-                        b.Length -= 1; // Get rid of the last commma
-                        b.Append("] ");
-                        return b.ToString();
-                    }
                 default:
-                    throw new Exception("Type not supported yet");
+                    return _obj !=null ? _obj.ToString() : "(Invalid)";
             }
         }
 

@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameInfo.cs" />
     <Compile Include="JSON.cs" />
     <Compile Include="PlanetNu.cs" />
     <Compile Include="Program.cs" />
